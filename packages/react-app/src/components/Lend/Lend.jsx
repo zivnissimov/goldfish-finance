@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Space, Radio, Card, Typography, Divider, Table, Skeleton } from "antd";
 import { formatUnits, formatEther } from "@ethersproject/units";
-import { TxBuilderV2, Network, Market } from '@aave/protocol-js'
 import { ethers } from "ethers";
 import AaveAction from "./AaveAction"
 import { useAaveData } from "./AaveData"
@@ -22,11 +21,11 @@ function Lend({ selectedProvider, ethPrice }) {
   let txBuilder
   let lendingPool
 
-  if(customProvider) {
-    let aaveNetwork = process.env.REACT_APP_NETWORK==='kovan' ? Network.kovan : Network.main
-    txBuilder = new TxBuilderV2(aaveNetwork, customProvider);
-    lendingPool = txBuilder.getLendingPool(Market.Proto); // get all lending pool methods
-  }
+  // if(customProvider) {
+  //   let aaveNetwork = process.env.REACT_APP_NETWORK==='kovan' ? Network.kovan : Network.main
+  //   txBuilder = new TxBuilderV2(aaveNetwork, customProvider);
+  //   lendingPool = txBuilder.getLendingPool(Market.Proto); // get all lending pool methods
+  // }
 
   const [liveAsset, setLiveAsset] = useState()
 
