@@ -9,7 +9,7 @@ import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { useUserAddress } from "eth-hooks";
 import { useExchangePrice, useGasPrice, useUserProvider, useContractLoader, useContractReader, useEventListener, useBalance, useExternalContractLoader } from "./hooks";
-import { Header, Account, Faucet, Ramp, Contract, GasGauge, Swap, Lend, SnatchToken, Approver } from "./components";
+import { Header, Account, Faucet, Ramp, Contract, GasGauge, Lend, SnatchToken, Approver } from "./components";
 import { Transactor } from "./helpers";
 import { formatEther, parseEther } from "@ethersproject/units";
 import { Hints, Ape } from "./views"
@@ -110,22 +110,22 @@ function App(props) {
       <BrowserRouter>
 
         <Menu style={{ textAlign:"center" }} selectedKeys={[route]} mode="horizontal">
-          <Menu.Item key="/swap">
-            <Link onClick={()=>{setRoute("/swap")}} to="/swap">Swap</Link>
+          <Menu.Item key="/deposit">
+            <Link onClick={()=>{setRoute("/deposit")}} to="/deposit">Deposit</Link>
           </Menu.Item>
-          <Menu.Item key="/lend">
-            <Link onClick={()=>{setRoute("/lend")}} to="/lend">Lend</Link>
-          </Menu.Item>
-          <Menu.Item key="/aave-ape">
-            <Link onClick={()=>{setRoute("/aave-ape")}} to="/aave-ape">Ape</Link>
+          <Menu.Item key="/withdraw">
+            <Link onClick={()=>{setRoute("/withdraw")}} to="/withdraw">Withdraw</Link>
           </Menu.Item>
           <Menu.Item key="/approve">
             <Link onClick={()=>{setRoute("/approve")}} to="/approve">Approve</Link>
           </Menu.Item>
-          {onLocalChain&&(<>
-          <Menu.Item key="/snatch">
-            <Link onClick={()=>{setRoute("/snatch")}} to="/snatch">Snatch</Link>
-          </Menu.Item></>)}
+          
+          <Menu.Item key="/borrow">
+            <Link onClick={()=>{setRoute("/borrow")}} to="/borrow">Borrow</Link>
+          </Menu.Item>
+          <Menu.Item key="/repay">
+            <Link onClick={()=>{setRoute("/repay")}} to="/repay">Repay</Link>
+          </Menu.Item>
         </Menu>
         <Modal visible={showNetworkWarning} title={"Unknown network"} footer={null} closable={false}>
           <span>{`Your wallet is not corrected to the right network, please connect to the network at ${localProviderUrlFromEnv}`}</span>
@@ -133,18 +133,10 @@ function App(props) {
         </Modal>
 
         <Switch>
-        <Route exact path="/swap">
-          <Row justify="center">
-          <Swap
-            selectedProvider={userProvider}
-            tokenListURI={tokenListURI}
-            />
-          </Row>
-        </Route>
         <Route exact path="/">
-              <Redirect to="/lend" />
+              <Redirect to="/deposit" />
         </Route>
-        <Route exact path="/lend">
+        <Route exact path="/approve">
           <Row justify="center">
           <Lend
             selectedProvider={userProvider}
@@ -152,23 +144,27 @@ function App(props) {
             />
           </Row>
         </Route>
-          <Route exact path="/aave-ape">
-            <Ape selectedProvider={userProvider}/>
-            {onLocalChain&&<Contract
-              name="AaveApe"
-              signer={userProvider.getSigner()}
-              provider={localProvider}
-              address={address}
-            />}
-          </Route>
-          <Route exact path="/snatch">
+          <Route exact path="/deposit">
             <SnatchToken
               mainnetProvider={mainnetProvider}
               localProvider={localProvider}
               tx={tx}
             />
           </Route>
-          <Route exact path="/approve">
+          <Route exact path="/withdraw">
+            <SnatchToken
+              mainnetProvider={mainnetProvider}
+              localProvider={localProvider}
+              tx={tx}
+            />
+          </Route>
+          <Route exact path="/borrow">
+            <Approver
+              userProvider={userProvider}
+              tx={tx}
+            />
+          </Route>
+          <Route exact path="/repay">
             <Approver
               userProvider={userProvider}
               tx={tx}

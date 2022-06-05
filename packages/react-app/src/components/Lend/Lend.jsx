@@ -154,7 +154,7 @@ function Lend({ selectedProvider, ethPrice }) {
         </Space>}
       style={{ textAlign: 'left' }}
         >
-    {userAccountDisplay}
+    {/* {userAccountDisplay} */}
     <Divider/>
         <Table dataSource={assetData.filter(asset => (showActiveAssets&&userAssetList)?Object.keys(userAssetList).includes(asset.symbol):true)} columns={columns} pagination={false} scroll={{ x: 'max-content' }}/>
     </Card>
