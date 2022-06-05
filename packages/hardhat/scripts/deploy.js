@@ -1,98 +1,66 @@
-/* eslint no-use-before-define: "warn" */
-const fs = require("fs");
-const chalk = require("chalk");
-const { config, ethers, tenderly } = require("hardhat");
-const { utils } = require("ethers");
-const R = require("ramda");
+// deploy/00_deploy_your_contract.js
 
-const main = async () => {
+const { ethers } = require("hardhat");
 
-  console.log("\n\n 📡 Deploying...\n");
+// const acct1 = "0x5966aa11c794893774a382d9a19743B8be6BFFd1";
+// const acct2 = "0x9421FE8eCcAfad76C3A9Ec8f9779fAfA05A836B3";
 
-  let mainnetConfig = {
-    lendingPoolAddressesProvider: "0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5",
-    uniswapRouterAddress: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"
-  }
+module.exports = async ({ getNamedAccounts, deployments }) => {
+  const { deploy } = deployments;
+  //change this 'deployer' to HD wallet provider and send from a different account
 
-  // Kovan Aave has a dedicated mock Uniswap contract... https://kovan.etherscan.io/address/0xC18451d36aA370fDACe8d45839bF975F48f7AEa1#readContract
-  let kovanConfig = {
-    lendingPoolAddressesProvider: "0x88757f2f99175387ab4c6a4b3067c77a695b0349",
-    uniswapRouterAddress: "0xfcd87315f0e4067070ade8682fcdbc3006631441"
-  }
+  // await hre.network.provider.request({
+  //   method: "hardhat_impersonateAccount",
+  //   params: [acct1],
+  // });
 
-  let deployConfig = (process.env.HARDHAT_NETWORK === 'kovan' || config.defaultNetwork === 'kovan') ? kovanConfig : mainnetConfig
+  // await hre.network.provider.request({
+  //   method: "hardhat_impersonateAccount",
+  //   params: [acct2],
+  // });
 
-  const aaveApe = await deploy("AaveApe",[deployConfig.lendingPoolAddressesProvider, deployConfig.uniswapRouterAddress])
+  const { deployer } = await getNamedAccounts();
+  console.log(deployer);
 
-  console.log(
-    " 💾  Artifacts (address, abi, and args) saved to: ",
-    chalk.blue("packages/hardhat/artifacts/"),
-    "\n\n"
-  );
-};
-
-const deploy = async (contractName, _args) => {
-  console.log(` 🛰  Deploying: ${contractName}`);
-
-  const contractArgs = _args || [];
-  const contractArtifacts = await ethers.getContractFactory(contractName);
-  const deployed = await contractArtifacts.deploy(...contractArgs);
-  const encoded = abiEncodeArgs(deployed, contractArgs);
-  fs.writeFileSync(`artifacts/${contractName}.address`, deployed.address);
-
-  console.log(
-    " 📄",
-    chalk.cyan(contractName),
-    "deployed to:",
-    chalk.magenta(deployed.address),
-  );
-
-  if (!encoded || encoded.length <= 2) return deployed;
-  fs.writeFileSync(`artifacts/${contractName}.args`, encoded.slice(2));
-
-  return deployed;
-};
-
-// ------ utils -------
-
-// abi encodes contract arguments
-// useful when you want to manually verify the contracts
-// for example, on Etherscan
-const abiEncodeArgs = (deployed, contractArgs) => {
-  // not writing abi encoded args if this does not pass
-  if (
-    !contractArgs ||
-    !deployed ||
-    !R.hasPath(["interface", "deploy"], deployed)
-  ) {
-    return "";
-  }
-  const encoded = utils.defaultAbiCoder.encode(
-    deployed.interface.deploy.inputs,
-    contractArgs
-  );
-  return encoded;
-};
-
-// checks if it is a Solidity file
-const isSolidity = (fileName) =>
-  fileName.indexOf(".sol") >= 0 && fileName.indexOf(".swp") < 0;
-
-const readArgsFile = (contractName) => {
-  let args = [];
-  try {
-    const argsFile = `./contracts/${contractName}.args`;
-    if (!fs.existsSync(argsFile)) return args;
-    args = JSON.parse(fs.readFileSync(argsFile));
-  } catch (e) {
-    console.log(e);
-  }
-  return args;
-};
-
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
+  await deploy("GoldfishPool", {
+    from: deployer,
+    args: [],
+    log: true,
   });
+
+  // Getting a previously deployed contract
+  const Token = await ethers.getContract("GoldfishToken", deployer);
+  console.log(Token.address);
+  // await YourContract.setPurpose("Hello");
+
+  // To take ownership of yourContract using the ownable library uncomment next line and add the
+  // address you want to be the owner.
+  // yourContract.transferOwnership(YOUR_ADDRESS_HERE);
+
+  //const yourContract = await ethers.getContractAt('YourContract', "0xaAC799eC2d00C013f1F11c37E654e59B0429DF6A") //<-- if you want to instantiate a version of a contract at a specific address!
+
+  /*
+  //If you want to send value to an address from the deployer
+  const deployerWallet = ethers.provider.getSigner()
+  await deployerWallet.sendTransaction({
+    to: "0x34aA3F359A9D614239015126635CE7732c18fDF3",
+    value: ethers.utils.parseEther("0.001")
+  })
+  */
+
+  /*
+  //If you want to send some ETH to a contract on deploy (make your constructor payable!)
+  const yourContract = await deploy("YourContract", [], {
+  value: ethers.utils.parseEther("0.05")
+  });
+  */
+
+  /*
+  //If you want to link a library into your contract:
+  // reference: https://github.com/austintgriffith/scaffold-eth/blob/using-libraries-example/packages/hardhat/scripts/deploy.js#L19
+  const yourContract = await deploy("YourContract", [], {}, {
+   LibraryName: **LibraryAddress**
+  });
+  */
+};
+module.exports.tags = ["GoldfishToken", "GoldfishPool"];
